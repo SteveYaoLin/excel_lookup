@@ -1,0 +1,1 @@
+excel_look_up.py 把excelA的C列内容，在excelB的C列中查找，找到后把excel  A B 列 复制到该行的AB列。成功
