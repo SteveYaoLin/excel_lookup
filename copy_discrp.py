@@ -36,28 +36,42 @@ def process_files(excel2_path):
     if df2.shape[1] < 4:
         print("第二个文件缺少C/D列（第3/4列）")
         return
+    if df2.shape[1] < 8:
+        print("第二个文件缺少H列（第8列）")
+        return
 
-    # 构建第二个文件的C列到D列的映射字典（保留第一个匹配项）
+    # 构建第二个文件的C列到D列和H列的映射字典（保留第一个匹配项）
     c_to_d = {}
+    c_to_h = {}
     for idx, row in df2.iterrows():
         c_value = str(row[2]) if pd.notnull(row[2]) else ""  # C列是第3列（索引2）
         if c_value not in c_to_d:
             d_value = row[3] if pd.notnull(row[3]) else ""    # D列是第4列（索引3）
+            h_value = row[7] if pd.notnull(row[7]) else ""     # H列是第8列（索引7）
             c_to_d[c_value] = d_value
+            c_to_h[c_value] = h_value
 
-    # 处理第一个文件的M列（第13列，索引12）
-    m_col = []
+    # 处理第一个文件的M列和N列
+    m_col, n_col = [], []
     for idx, row in df1.iterrows():
         l_value = str(row[11]) if pd.notnull(row[11]) else ""  # L列是第12列（索引11）
         # 查找匹配项
         matched_d = c_to_d.get(l_value, "")
+        matched_h = c_to_h.get(l_value, "")
         m_col.append(matched_d)
+        n_col.append(matched_h)
 
-    # 更新第一个文件的M列
+    # 更新第一个文件的M列（第13列，索引12）
     if df1.shape[1] > 12:
         df1.iloc[:, 12] = m_col
     else:
         df1[12] = m_col
+
+    # 更新第一个文件的N列（第14列，索引13）
+    if df1.shape[1] > 13:
+        df1.iloc[:, 13] = n_col
+    else:
+        df1[13] = n_col
 
     # 保存第一个文件（覆盖原文件）
     try:
