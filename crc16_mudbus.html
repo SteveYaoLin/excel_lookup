@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRC16 Algorithm Flowchart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .box {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            text-align: center;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 200px;
+        }
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #333;
+            margin: 5px 0;
+        }
+        .decision-box {
+            background-color: #ffeb3b;
+        }
+        .branch {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .branch-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .branch-label {
+            margin: 5px;
+            font-weight: bold;
+        }
+        .merge {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .merge-line {
+            width: 80%;
+            height: 2px;
+            background-color: #333;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="flowchart">
+        <div class="box">初始化CRC = 0xFFFF</div>
+        <div class="arrow"></div>
+        
+        <div class="box">遍历每个字节：<br>1. CRC ^= 当前字节</div>
+        <div class="arrow"></div>
+        
+        <div class="box">遍历字节的8个位：<br>（从bit0到bit7）</div>
+        <div class="arrow"></div>
+        
+        <div class="box decision-box">检查CRC最低位是否为1？</div>
+        
+        <div class="branch">
+            <div class="branch-section">
+                <div class="branch-label">否</div>
+                <div class="arrow"></div>
+                <div class="box">仅右移1位</div>
+            </div>
+            <div class="branch-section">
+                <div class="branch-label">是</div>
+                <div class="arrow"></div>
+                <div class="box">右移1位并异或0xA001</div>
+            </div>
+        </div>
+        
+        <div class="merge">
+            <div class="merge-line"></div>
+        </div>
+        <div class="arrow"></div>
+        
+        <div class="box">处理完所有位？<br>（8次循环）</div>
+        
+        <div class="branch">
+            <div class="branch-section">
+                <div class="branch-label">否</div>
+                <div class="arrow"></div>
+                <div class="box">处理下一个字节</div>
+                <div class="arrow"></div>
+                <div style="width: 100px; height: 30px;"></div> <!-- Spacer -->
+            </div>
+            <div class="branch-section">
+                <div class="branch-label">是</div>
+                <div class="arrow"></div>
+                <div class="box">输出最终CRC值</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
