@@ -27,8 +27,8 @@ class SerialApp:
         self.recv_queue = queue.Queue()
         self.setup_ui()
         self.update_ports()
-        self.hex_mode = True  # 默认十六进制显示
-        self.receive_count = 0  # 接收计数器
+        self.hex_mode = True
+        self.receive_count = 0
 
     def setup_ui(self):
         self.master.title("串口调试工具")
@@ -50,6 +50,14 @@ class SerialApp:
         self.connect_btn = ttk.Button(config_frame, text="打开", command=self.toggle_connection)
         self.connect_btn.grid(row=0, column=5)
 
+        # 批量输入
+        bulk_frame = ttk.Frame(self.master)
+        bulk_frame.pack(padx=10, pady=5, fill=tk.X)
+        ttk.Label(bulk_frame, text="批量输入:").pack(side=tk.LEFT)
+        self.bulk_entry = ttk.Entry(bulk_frame, width=50)
+        self.bulk_entry.pack(side=tk.LEFT, padx=5)
+        ttk.Button(bulk_frame, text="解析", command=self.parse_bulk_input).pack()
+
         # 数据帧设置
         data_frame = ttk.LabelFrame(self.master, text="数据帧配置")
         data_frame.pack(padx=10, pady=5, fill=tk.X)
@@ -61,7 +69,7 @@ class SerialApp:
             ttk.Label(data_frame, text=f"D{i}").grid(row=row, column=col*2, padx=2)
             entry = ttk.Entry(data_frame, width=4)
             entry.grid(row=row, column=col*2+1, padx=2)
-            if i == 12:  # CRC字段设为只读
+            if i == 12:
                 entry.config(state='readonly')
             self.entries.append(entry)
 
@@ -86,6 +94,42 @@ class SerialApp:
         self.status = ttk.Label(self.master, text="就绪", anchor=tk.W)
         self.status.pack(fill=tk.X, padx=10)
 
+    def parse_bulk_input(self):
+        """解析批量输入数据（13个值：D0-D11和D13）"""
+        input_str = self.bulk_entry.get().strip()
+        if not input_str:
+            messagebox.showerror("错误", "输入不能为空")
+            return
+        
+        parts = input_str.split()
+        if len(parts) != 13:
+            messagebox.showerror("格式错误", "需要13个十六进制数据（用空格分隔）")
+            return
+
+        try:
+            values = [int(x, 16) for x in parts]
+        except ValueError:
+            messagebox.showerror("格式错误", "包含无效的十六进制数")
+            return
+
+        # 填充D0-D11
+        for i in range(12):
+            self.entries[i].delete(0, tk.END)
+            self.entries[i].insert(0, f"{values[i]:02X}")
+
+        # 填充D13（帧尾）
+        self.entries[13].delete(0, tk.END)
+        self.entries[13].insert(0, f"{values[12]:02X}")  # 输入的第13个对应D13
+
+        # 自动计算D12（CRC）
+        crc_data = [values[i] for i in range(1, 12)]  # D1-D11
+        crc = calculate_crc8(crc_data)
+        self.entries[12].config(state='normal')
+        self.entries[12].delete(0, tk.END)
+        self.entries[12].insert(0, f"{crc:02X}")
+        self.entries[12].config(state='readonly')
+
+    # 以下方法保持与之前版本相同（省略部分重复代码）
     def update_ports(self):
         ports = [port.device for port in serial.tools.list_ports.comports()]
         self.port_cb['values'] = ports
